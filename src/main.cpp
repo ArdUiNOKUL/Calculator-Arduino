@@ -16,10 +16,25 @@ Keypad keypad = Keypad(makeKeymap(keys), (byte *)pin_rows, (byte *)pin_column, R
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
 DisplayText display(&lcd, &keypad);
 
-uint8_t number1 = 0;
-uint8_t number2 = 0;
-bool secondNumber = false;
-char lastOperation;
+// void findOperators(const char* input){
+//     for (size_t i = 0; i < strlen(input); i++)
+//     {
+//         switch (input[i])
+//         {
+//         case '+':
+//             break;
+//         case '-':
+//             break;
+//         case '*':
+//             break;
+//         case '/':
+//             break;
+//         default:
+//             break;
+//         }
+//     }
+
+// }
 
 void setup()
 {
@@ -42,17 +57,30 @@ void loop()
         switch (key)
         {
         case '*':
-            display.selectOption("+-*/");
+            display.addChar(display.selectOption("+-*/"));
             
             break;
 
         case '#':
+            switch (display.selectOption("dD="))
+            {
+            case 'd':
+                display.removeChar();
+                break;
+            case 'D':
+                display.clear();
+                break;
+            case '=':
+                display.clear();
+                int result;
+
+            default:
+                break;
+            }
             break;
         
         default:
             display.addChar(key);
-            if (!secondNumber) number1 = number1 * 10 + (key - '0');
-            else number2 = number2 * 10 + (key - '0');
             break;
         }
     }

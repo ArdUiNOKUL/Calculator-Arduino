@@ -27,8 +27,9 @@ public:
     void print(const char *text, int line);
     void print(const char *text, int line, bool clear);
     void Error(const char *text, int timeout = 2000);
+    void FixCursor();
 
-    void selectOption(const char options[]);
+    char selectOption(const char options[], char stopKey = '#');
 };
 
 #endif // DisplayText_h

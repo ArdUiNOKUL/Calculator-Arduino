@@ -2,11 +2,6 @@
 #include <LiquidCrystal_I2C.h>
 #include <DisplayText.h>
 
-bool isNumber(char c)
-{
-    return (c >= '0' && c <= '9');
-}
-
 DisplayText::DisplayText(LiquidCrystal_I2C *lcd, Keypad *keypad)
 {
     this->lcd = lcd;
@@ -25,13 +20,11 @@ void DisplayText::addChar(char c)
     if (this->textIndex < 16)
     {
         this->text[this->textIndex][0] = c;
-        this->text[this->textIndex][1] = '\0';
         this->textIndex++;
     }
     else if (this->textIndex < 32)
     {
         this->text[this->textIndex - 16][1] = c;
-        this->text[this->textIndex - 16][2] = '\0';
         this->textIndex++;
     }
     DisplayText::print();
@@ -107,9 +100,42 @@ void DisplayText::print()
 {
     this->lcd->clear();
     this->lcd->setCursor(0, 0);
-    this->lcd->print(this->text[0]);
+    for (int i = 0; i < 16; i++)
+    {
+        if (this->text[i][0] != '\0')
+        {
+            this->lcd->print(this->text[i][0]);
+        }
+        else
+        {
+            break;
+        }
+    }
     this->lcd->setCursor(0, 1);
-    this->lcd->print(this->text[1]);
+    for (int i = 0; i < 16; i++)
+    {
+        if (this->text[i][1] != '\0')
+        {
+            this->lcd->print(this->text[i][1]);
+        }
+        else
+        {
+            break;
+        }
+    }
+    DisplayText::FixCursor();
+}
+
+void DisplayText::FixCursor()
+{
+    if (this->textIndex < 16)
+    {
+        this->lcd->setCursor(this->textIndex, 0);
+    }
+    else if (this->textIndex < 32)
+    {
+        this->lcd->setCursor(this->textIndex - 16, 1);
+    }
 }
 
 void DisplayText::print(const char *text)
@@ -172,7 +198,7 @@ void DisplayText::Error(const char *text, int timeout)
 
 /* ------------------ */
 
-void DisplayText::selectOption(const char options[]){
+char DisplayText::selectOption(const char options[], char stopKey){
     this->optionSelectMode = true;
     this->lcd->cursor();
     short unsigned int optionsSize = strlen(options);
@@ -181,20 +207,25 @@ void DisplayText::selectOption(const char options[]){
     for(unsigned int i = 0; i < optionsSize; i++){
         sprintf(optionText, "%s%u-%c ", optionText, i+1, options[i]);
         Serial.println(optionText);
-        DisplayText::print(optionText,2);
     }
+    DisplayText::print(optionText,2);
     free(optionText);
-    this->lcd->noBlink();
+    // this->lcd->noBlink();
     while(this->optionSelectMode){
         const char key = this->keypad->getKey();
         if(key){
-            if(isNumber(key) && key <= optionsSize){
+            // Serial.println(key);
+            // Serial.println(!isnan(key));
+            // Serial.println((unsigned short)(key - '0'));
+            if(!isnan(key) && (unsigned short)(key - '0') <= optionsSize){
                 this->optionSelectMode = false;
-                DisplayText::clear();
-                DisplayText::addChar(options[key - '0' - 1]);
-                delay(1000);
-
-            }
+                return options[key - '0' - 1];
+                break;
+            } else if(key == stopKey){
+                this->optionSelectMode = false;
+                DisplayText::print();
+                break;
+            } 
         }
     }
 }
