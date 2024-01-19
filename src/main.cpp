@@ -14,7 +14,7 @@ byte pin_rows[ROW_NUM] = {12, 11, 10, 9};
 byte pin_column[COLUMN_NUM] = {7, 6, 5};
 Keypad keypad = Keypad(makeKeymap(keys), (byte *)pin_rows, (byte *)pin_column, ROW_NUM, COLUMN_NUM);
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
-DisplayText display(&lcd);
+DisplayText display(&lcd, &keypad);
 
 uint8_t number1 = 0;
 uint8_t number2 = 0;

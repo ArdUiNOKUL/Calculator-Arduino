@@ -2,9 +2,15 @@
 #include <LiquidCrystal_I2C.h>
 #include <DisplayText.h>
 
-DisplayText::DisplayText(LiquidCrystal_I2C *lcd)
+bool isNumber(char c)
+{
+    return (c >= '0' && c <= '9');
+}
+
+DisplayText::DisplayText(LiquidCrystal_I2C *lcd, Keypad *keypad)
 {
     this->lcd = lcd;
+    this->keypad = keypad;
 }
 
 DisplayText::~DisplayText()
@@ -109,7 +115,7 @@ void DisplayText::print()
 void DisplayText::print(const char *text)
 {
     // Checking length of text
-    if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
+    // if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
 
     this->lcd->clear();
     this->lcd->setCursor(0, 0);
@@ -118,7 +124,7 @@ void DisplayText::print(const char *text)
 
 void DisplayText::print(const char *text, bool clear)
 {
-    if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
+    // if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
 
     if (clear) this->lcd->clear();
 
@@ -128,7 +134,7 @@ void DisplayText::print(const char *text, bool clear)
 
 void DisplayText::print(const char *text, int line)
 {
-    if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
+    // if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
 
     if(line == 1){
         this->lcd->setCursor(0, 0);
@@ -140,7 +146,7 @@ void DisplayText::print(const char *text, int line)
 
 void DisplayText::print(const char *text, int line, bool clear)
 {
-    if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
+    // if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
     if (clear) this->lcd->clear();
 
     if(line == 1){
@@ -169,9 +175,26 @@ void DisplayText::Error(const char *text, int timeout)
 void DisplayText::selectOption(const char options[]){
     this->optionSelectMode = true;
     this->lcd->cursor();
+    short unsigned int optionsSize = strlen(options);
     DisplayText::print("Select options:", true);
-    for(unsigned int i = 0; i < strlen(options); i++){
-        this->lcd->setCursor(0, 1);
-        DisplayText::print(i+"-" + options[i] + ' ', 2);
+    char * optionText = (char *)malloc(16*sizeof(char));
+    for(unsigned int i = 0; i < optionsSize; i++){
+        sprintf(optionText, "%s%u-%c ", optionText, i+1, options[i]);
+        Serial.println(optionText);
+        DisplayText::print(optionText,2);
+    }
+    free(optionText);
+    this->lcd->noBlink();
+    while(this->optionSelectMode){
+        const char key = this->keypad->getKey();
+        if(key){
+            if(isNumber(key) && key <= optionsSize){
+                this->optionSelectMode = false;
+                DisplayText::clear();
+                DisplayText::addChar(options[key - '0' - 1]);
+                delay(1000);
+
+            }
+        }
     }
 }

@@ -3,15 +3,17 @@
 #pragma once
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
+#include <Keypad.h>
 class DisplayText
 {
 private:
     char text[16][2];
     int textIndex = 0;
     LiquidCrystal_I2C *lcd;
+    Keypad *keypad;
     bool optionSelectMode;
 public:
-    DisplayText(LiquidCrystal_I2C *lcd);
+    DisplayText(LiquidCrystal_I2C *lcd, Keypad *keypad);
     ~DisplayText();
     void addChar(char c);
     void addChar(char c, int index, int line);
