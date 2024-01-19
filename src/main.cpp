@@ -1,96 +1,64 @@
 #include <Arduino.h>
 #include <Keypad.h>
-
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-
-// I2C address 0x3F for a 16 chars and 2 line display
-
-#define WIRE Wire
-
+#include <LiquidCrystal_I2C.h> // I2C address 0x3F for a 16 chars and 2 line display
+#include <DisplayText.h>
 const int ROW_NUM = 4;
 const int COLUMN_NUM = 3;
-
 char keys[ROW_NUM][COLUMN_NUM] = {
-  {'1','2','3'},
-  {'4','5','6'},
-  {'7','8','9'},
-  {'*','0','#'}
-};
-
-byte pin_rows[ROW_NUM] = {8,9,10,11};
-byte pin_column[COLUMN_NUM] = {2, 3, 4};
-
-Keypad keypad = Keypad( makeKeymap(keys), (byte*)pin_rows, (byte*)pin_column, ROW_NUM, COLUMN_NUM );
-
-/* ------- */
-
+    {'1', '2', '3'},
+    {'4', '5', '6'},
+    {'7', '8', '9'},
+    {'*', '0', '#'}};
+byte pin_rows[ROW_NUM] = {12, 11, 10, 9};
+byte pin_column[COLUMN_NUM] = {7, 6, 5};
+Keypad keypad = Keypad(makeKeymap(keys), (byte *)pin_rows, (byte *)pin_column, ROW_NUM, COLUMN_NUM);
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
+DisplayText display(&lcd);
 
-/* ------- */
+uint8_t number1 = 0;
+uint8_t number2 = 0;
+bool secondNumber = false;
+char lastOperation;
 
-void setup() {
-
+void setup()
+{
     lcd.init();
     lcd.backlight();
-    lcd.write(55);
-
+    lcd.blink();
     Serial.begin(9600);
     pinMode(LED_BUILTIN, OUTPUT);
 
-    WIRE.begin();
+    display.print("Enter numbers:");
+    delay(2000);
+    display.clear();
 }
-void findI2CAddress();
-void loop() {
-    // char key = keypad.getKey();
+void loop()
+{
+    const char key = keypad.getKey();
     digitalWrite(LED_BUILTIN, HIGH);
-    // if (key) {
-    //     Serial.println(key);
-    // }
+    if (key)
+    {
+        display.print("Key pressed:rwwjwrwehwhfjkwjkweg ");
+        switch (key)
+        {
+        case '*':
+            while (0)
+            {
+                char operation = keypad.getKey();
+            }
+            
+            break;
+
+        case '#':
+            break;
+        
+        default:
+            if (!secondNumber) number1 = number1 * 10 + (key - '0');
+            else number2 = number2 * 10 + (key - '0');
+            break;
+        }
+    }
     delay(100);
     digitalWrite(LED_BUILTIN, LOW);
-
-    findI2CAddress();
-}
-
-void findI2CAddress(){
-        byte error, address;
-  int nDevices;
-
-  Serial.println("Scanning...");
-
-  nDevices = 0;
-  for(address = 1; address < 127; address++ )
-  {
-    // The i2c_scanner uses the return value of
-    // the Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
-    WIRE.beginTransmission(address);
-    error = WIRE.endTransmission();
-
-    if (error == 0)
-    {
-      Serial.print("I2C device found at address 0x");
-      if (address<16)
-        Serial.print("0");
-      Serial.print(address,HEX);
-      Serial.println("  !");
-
-      nDevices++;
-    }
-    else if (error==4)
-    {
-      Serial.print("Unknown error at address 0x");
-      if (address<16)
-        Serial.print("0");
-      Serial.println(address,HEX);
-    }
-  }
-  if (nDevices == 0)
-    Serial.println("No I2C devices found\n");
-  else
-    Serial.println("done\n");
-
-  delay(5000);           // wait 5 seconds for next scan
-
 }
