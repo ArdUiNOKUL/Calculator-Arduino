@@ -15,6 +15,18 @@ DisplayText::~DisplayText()
     this->lcd->off();
 }
 
+char *DisplayText::getText()
+{
+    // Serial print whole text array
+    for(int i = 0; i < 16; i++){
+        Serial.print(this->text[i][0]);
+    }
+    for(int i = 0; i < 16; i++){
+        Serial.print(this->text[i][1]);
+    }
+    return (char *)this->text;
+}
+
 void DisplayText::addChar(char c)
 {
     if (this->textIndex < 16)
@@ -205,8 +217,8 @@ char DisplayText::selectOption(const char options[], char stopKey){
     DisplayText::print("Select options:", true);
     char * optionText = (char *)malloc(16*sizeof(char));
     for(unsigned int i = 0; i < optionsSize; i++){
-        sprintf(optionText, "%s%u-%c ", optionText, i+1, options[i]);
-        Serial.println(optionText);
+        sprintf(optionText, "%s%u%c%c ", optionText, i+1, 126, options[i]);
+        // Serial.println(optionText);
     }
     DisplayText::print(optionText,2);
     free(optionText);
