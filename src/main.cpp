@@ -39,14 +39,10 @@ void loop()
     digitalWrite(LED_BUILTIN, HIGH);
     if (key)
     {
-        display.print("Key pressed:rwwjwrwehwhfjkwjkweg ");
         switch (key)
         {
         case '*':
-            while (0)
-            {
-                char operation = keypad.getKey();
-            }
+            display.selectOption("+-*/");
             
             break;
 
@@ -54,6 +50,7 @@ void loop()
             break;
         
         default:
+            display.addChar(key);
             if (!secondNumber) number1 = number1 * 10 + (key - '0');
             else number2 = number2 * 10 + (key - '0');
             break;

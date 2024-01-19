@@ -22,9 +22,11 @@ public:
     void print();
     void print(const char *text);
     void print(const char *text, bool clear);
-    void Error(const char *text);
+    void print(const char *text, int line);
+    void print(const char *text, int line, bool clear);
+    void Error(const char *text, int timeout = 2000);
 
-    void selectOption(char options[]);
+    void selectOption(const char options[]);
 };
 
 #endif // DisplayText_h

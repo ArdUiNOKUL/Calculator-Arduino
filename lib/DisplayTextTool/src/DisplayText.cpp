@@ -109,7 +109,8 @@ void DisplayText::print()
 void DisplayText::print(const char *text)
 {
     // Checking length of text
-    if(strlen(text) > 32) DisplayText::Error("Text is too big");
+    if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
+
     this->lcd->clear();
     this->lcd->setCursor(0, 0);
     this->lcd->print(text);
@@ -117,24 +118,60 @@ void DisplayText::print(const char *text)
 
 void DisplayText::print(const char *text, bool clear)
 {
+    if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
+
     if (clear) this->lcd->clear();
 
     this->lcd->setCursor(0, 0);
     this->lcd->print(text);
 }
 
-void DisplayText::Error(const char *text)
+void DisplayText::print(const char *text, int line)
+{
+    if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
+
+    if(line == 1){
+        this->lcd->setCursor(0, 0);
+    } else if(line == 2){
+        this->lcd->setCursor(0, 1);
+    }
+    this->lcd->print(text);
+}
+
+void DisplayText::print(const char *text, int line, bool clear)
+{
+    if(strlen(text) > 16) {DisplayText::Error("Text is too big"); return;}
+    if (clear) this->lcd->clear();
+
+    if(line == 1){
+        this->lcd->setCursor(0, 0);
+    } else if(line == 2){
+        this->lcd->setCursor(0, 1);
+    }
+    this->lcd->print(text);
+}
+
+void DisplayText::Error(const char *text, int timeout)
 {
     this->lcd->clear();
     this->lcd->setCursor(0, 0);
     this->lcd->print("Error:");
     this->lcd->setCursor(0, 1);
     this->lcd->print(text);
+    delay(timeout);
+    this->lcd->clear();
+    this->lcd->setCursor(0, 0);
+    DisplayText::print();
 }
 
 /* ------------------ */
 
-// void DisplayText::selectOption(char options){
-//     this->optionSelectMode = true;
-//     DisplayText::print("Select options:")
-// }
+void DisplayText::selectOption(const char options[]){
+    this->optionSelectMode = true;
+    this->lcd->cursor();
+    DisplayText::print("Select options:", true);
+    for(unsigned int i = 0; i < strlen(options); i++){
+        this->lcd->setCursor(0, 1);
+        DisplayText::print(i+"-" + options[i] + ' ', 2);
+    }
+}
