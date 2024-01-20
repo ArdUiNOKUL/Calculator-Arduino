@@ -15,7 +15,8 @@ private:
 public:
     DisplayText(LiquidCrystal_I2C *lcd, Keypad *keypad);
     ~DisplayText();
-    char* getText();
+    char* getTextData();
+    char* formatTextData(char* text);
     void addChar(char c);
     void addChar(char c, int index, int line);
     void removeChar();
