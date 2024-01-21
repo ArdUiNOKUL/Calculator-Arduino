@@ -15,7 +15,28 @@ byte pin_rows[ROW_NUM] = {12, 11, 10, 9};
 byte pin_column[COLUMN_NUM] = {7, 6, 5};
 Keypad keypad = Keypad(makeKeymap(keys), (byte *)pin_rows, (byte *)pin_column, ROW_NUM, COLUMN_NUM);
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
-DisplayText display(&lcd, &keypad);
+
+class DisplayTextCalculator : public DisplayText
+{
+public:
+    DisplayTextCalculator(LiquidCrystal_I2C *lcd, Keypad *keypad) : DisplayText(lcd, keypad)
+    {
+    }
+    void printResult(String result)
+    {
+        char *resultChar = Calculator::Utils::convertStrToCharPtr(result);
+        this->clear();
+        this->addChar('A');
+        this->addChar('=');
+        for(size_t i = 0; i < strlen(resultChar); i++){
+            this->addChar(resultChar[i]);
+        }
+        free(resultChar);
+        return;
+    }
+};
+
+DisplayTextCalculator display(&lcd, &keypad);
 
 void setup()
 {
@@ -35,6 +56,8 @@ void loop()
     digitalWrite(LED_BUILTIN, HIGH);
     if (key)
     {
+    // String firstOrderResult = Calculator::multiplingAndDividing("5*3+4");
+    // String secondOrderResult = Calculator::addingAndSubtracting(firstOrderResult);
         switch (key)
         {
         case '*':
@@ -54,15 +77,13 @@ void loop()
                     break;
                 case '=':
                 {
-                    Calculator::FractionMultiplierIndexResult firstOrderIndexes = Calculator::findMultiplierAndDivisor(display.formatTextData(display.getTextData()));
-                    // for(int i = 0; i < firstOrderIndexes.counterM; i++){
-                    //     Serial.println("Multiplier: " + String(firstOrderIndexes.multiplier[i].leftIndex) + " " + String(firstOrderIndexes.multiplier[i].index) + " " + String(firstOrderIndexes.multiplier[i].rightIndex));
-                    // }
-                    char* firstOrderResult = Calculator::multiplingAndDividing(display.formatTextData(display.getTextData()), firstOrderIndexes);
-                    free(firstOrderResult);
-                    display.clear();
+                    String result = Calculator::calculate(String(DisplayText::Utils::formatTextData(display.getTextData())));
+                    display.printResult(result);
                     break;
                 }
+                case '\0':
+                    break;
+                
                 default:
                     break;
             }
